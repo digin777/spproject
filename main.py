@@ -9,7 +9,6 @@ class main_window(Frame):
 		self.add_widgets()
 	def add_widgets(self):
 		self.table=table(self,data=pd.DataFrame({'W':[""],'T':[""],'sig':[""],'sw':[""]}))
-		#self.table.add_row({'W':"",'T':"",'sig':"",'sw':""})
 if __name__=='__main__':
 	root=Tk()
 	a=main_window(master=root)

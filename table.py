@@ -34,12 +34,8 @@ class TbEntry(Entry):
 			print(float(self.get()))
 			self.master.master.master.tb_dict[self.id][1].set(self.old_value)
 			try:
-				print(str(int(self.id.split(",")[0])+1)+","+str(0))
-				#print(self.master.master.master.tb_dict)
-				print(self.master.master.master.tb_dict.keys())
-				print(self.master.master.master.tb_dict[str(int(self.id.split(",")[0])+1)+","+str(0)])
+				self.master.master.master.tb_dict[str(int(self.id.split(",")[0])+1)+","+str(0)]
 			except:
-				print("here")
 				self.master.master.master.add_row({k:"" for k in self.master.master.master.data.columns})
 
 	def handle_enykey(self,event):
