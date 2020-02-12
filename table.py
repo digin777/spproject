@@ -1,5 +1,6 @@
 from tkinter import *
 import pandas as pd
+import numpy as np
 class TbEntry(Entry):
 	def __init__(self,master=None,id=None):
 		super().__init__(master)
@@ -8,7 +9,7 @@ class TbEntry(Entry):
 		self.master.selected_items=[]
 		self.dobindings()
 		self.flag=1
-		
+		#self.old_value=None
 	def dobindings(self): 
 		self.bind("<Button-1>",self.handle_left_click) 
 		self.bind("<Double-Button-1>",self.handle_double_click) 
@@ -26,18 +27,19 @@ class TbEntry(Entry):
 		if self.flag:
 			self.old_value=self.get()
 			self.flag=None
-		
+			
 	def handle_Enter(self,event):
 		self.flag=1
 		if self.old_value!=self.get():
 			self.old_value=self.get()
 			print(float(self.get()))
-			self.master.master.master.tb_dict[self.id][1].set(self.old_value)
 			try:
 				self.master.master.master.tb_dict[str(int(self.id.split(",")[0])+1)+","+str(0)]
 			except:
 				self.master.master.master.add_row({k:"" for k in self.master.master.master.data.columns})
-
+				self.master.master.master.data=self.master.master.master.data.append(pd.Series(),ignore_index=True)
+			self.master.master.master.data[self.master.master.master.data.columns[int(self.id.split(",")[1])]][int(self.id.split(",")[0])]=self.old_value
+			
 	def handle_enykey(self,event):
 		pass
 		
@@ -59,7 +61,7 @@ class TbEntry(Entry):
 			self['bg']="yellow"
 			#self['fg']='white'
 			print(self.master.selected_items)
-		
+			
 class table(Frame):
 	def __init__(self,master=None,data=None):
 		super().__init__(master)
@@ -111,7 +113,7 @@ class table(Frame):
 				x=Entry(self.scrollable_frame,fg="green",bg="black",cursor="arrow",justify="center",highlightcolor="green",font=('Arial',8,'bold'),state="readonly",textvariable=var)
 				var.set(data.columns[c])
 				x.grid(row=0,column=c)
-		print(self.no_rows)
+		#print(self.no_rows)
 		r=self.no_rows
 		for c in range(len(data.columns)):
 			self.tb_dict[str(r)+","+str(c)]=(TbEntry(self.scrollable_frame,id=str(r)+","+str(c)),StringVar())
@@ -120,6 +122,38 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,str(data.iloc[0][data.columns[c]]))
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=(r+1),column=c)
 		self.no_rows+=1
+		
+	def add_column(self,data):
+		assert isinstance(data,pd.core.series.Series),"It must be pandas Series"
+		self.add_empty_column(data.name)
+		c=self.no_cols
+		ds=[i for i in data]
+		for r in range(len(ds)):
+			self.tb_dict[str(r)+","+str(c)][1].set(str(ds[r]))
+			self.tb_dict[str(r)+","+str(c)][0].insert(0,ds[r])
+			self.data[data.name][r]=ds[r]
+		
+	def add_empty_column(self,column_name):
+		c=self.no_cols
+		var=StringVar()
+		x=Entry(self.scrollable_frame,fg="green",bg="black",cursor="arrow",justify="center",highlightcolor="green",font=('Arial',8,'bold'),state="readonly",textvariable=var)
+		var.set(column_name)
+		x.grid(row=0,column=c)
+		for r in range(self.no_rows):
+			self.tb_dict[str(r)+","+str(c)]=(TbEntry(self.scrollable_frame,id=str(r)+","+str(c)),StringVar())
+			self.tb_dict[str(r)+","+str(c)][0].textvariable=self.tb_dict[str(r)+","+str(c)][1]
+			self.tb_dict[str(r)+","+str(c)][1].set(str(""))
+			self.tb_dict[str(r)+","+str(c)][0].insert(0,"")
+			self.tb_dict[str(r)+","+str(c)][0].grid(row=r+1,column=c)
+			print(r,c)
+		self.data[column_name] = self.data.apply(lambda _: '', axis=1)
+	
+	def get_tbdata(self):
+		return self.data
+		
+	def set_tbdata(self,data):
+		self.data=data
+		
 if __name__=='__main__':
 	#s=pd.read_csv("D:\\S6 MCA\\Main_project_siva_and_prasanth\\data\\pddataf.csv")
 	x="D:\\S6 MCA\\Main_project_siva_and_prasanth\\data\\pddata.csv"
