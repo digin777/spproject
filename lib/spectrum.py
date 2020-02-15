@@ -1,4 +1,5 @@
 import math
+import pandas as pd
 class johnswapspectrum:
 
 	def __init__(self,alpha=None,hs=None,tp=None,gamma=None,*args):
@@ -43,7 +44,7 @@ class johnswapspectrum:
 		return((2*math.pi)/omega)
 		
 	def c_somega(self,omega,sigma,g=9.81):
-		part_a=round((self.alpha*(g**2)*(omega**-5)))
+		part_a=((self.alpha*(g**2)*(omega**-5)))
 		part_b=math.exp(-1.25*((omega/self.omega_z)**-4))
 		part_c=self.gamma**(math.exp((-(omega-self.omega_z)**2)/(2*(sigma**2)*(self.omega_z**2))))
 		return part_a*part_b*part_c

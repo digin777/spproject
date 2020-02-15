@@ -9,7 +9,7 @@ class TbEntry(Entry):
 		self.master.selected_items=[]
 		self.dobindings()
 		self.flag=1
-		#self.old_value=None
+		
 	def dobindings(self): 
 		self.bind("<Button-1>",self.handle_left_click) 
 		self.bind("<Double-Button-1>",self.handle_double_click) 
@@ -32,14 +32,18 @@ class TbEntry(Entry):
 		self.flag=1
 		if self.old_value!=self.get():
 			self.old_value=self.get()
-			print(float(self.get()))
+			try:
+				float(self.get())
+			except:
+				messagebox.showerror("Error", "Provide valid inputs")
+				return
 			try:
 				self.master.master.master.tb_dict[str(int(self.id.split(",")[0])+1)+","+str(0)]
 			except:
+				if self.master.master.master.no_rows!=1:
+					self.master.master.master.data=self.master.master.master.data.append(pd.Series(),ignore_index=True)
 				self.master.master.master.add_row({k:"" for k in self.master.master.master.data.columns})
-				self.master.master.master.data=self.master.master.master.data.append(pd.Series(),ignore_index=True)
-			self.master.master.master.data[self.master.master.master.data.columns[int(self.id.split(",")[1])]][int(self.id.split(",")[0])]=self.old_value
-			
+			self.master.master.master.data[self.master.master.master.data.columns[int(self.id.split(",")[1])]][int(self.id.split(",")[0])]=float(self.old_value)
 	def handle_enykey(self,event):
 		pass
 		
@@ -60,7 +64,6 @@ class TbEntry(Entry):
 			self.master.selected_items.append(self.id)
 			self['bg']="yellow"
 			#self['fg']='white'
-			print(self.master.selected_items)
 			
 class table(Frame):
 	def __init__(self,master=None,data=None):
@@ -104,16 +107,18 @@ class table(Frame):
 				self.tb_dict[str(r)+","+str(c)][1].set(str(data.iloc[r][data.columns[c]]))
 				self.tb_dict[str(r)+","+str(c)][0].insert(0,str(data.iloc[r][data.columns[c]]))
 				self.tb_dict[str(r)+","+str(c)][0].grid(row=(r+1),column=c)
-	
+		if self.no_rows==0:
+			self.add_row(data)
+				
 	def add_row(self,data):
-		data=pd.DataFrame({k: [v] for k, v in data.items()})
+		if type(data)==dict:
+			data=pd.DataFrame({k: [v] for k, v in data.items()})
 		if(self.no_rows==0):
 			for c in range(len(data.columns)):
 				var=StringVar()
 				x=Entry(self.scrollable_frame,fg="green",bg="black",cursor="arrow",justify="center",highlightcolor="green",font=('Arial',8,'bold'),state="readonly",textvariable=var)
 				var.set(data.columns[c])
 				x.grid(row=0,column=c)
-		#print(self.no_rows)
 		r=self.no_rows
 		for c in range(len(data.columns)):
 			self.tb_dict[str(r)+","+str(c)]=(TbEntry(self.scrollable_frame,id=str(r)+","+str(c)),StringVar())
@@ -132,8 +137,28 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(ds[r]))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,ds[r])
 			self.data[data.name][r]=ds[r]
-		
+			
+	def update_column(self,data):
+		assert isinstance(data,pd.core.series.Series),"It must be pandas Series"
+		c=self.no_cols
+		if data.name in self.data.columns:
+			c_no=list(self.data.columns).index(data.name)
+			c_no+=1
+			try:
+				if type(self.tb_dict[str(0)+","+str(c_no)]) ==tuple:
+					ds=[i for i in data]
+					for r in range(len(ds)):
+						self.tb_dict[str(r)+","+str(c_no)][1].set(str(ds[r]))
+						self.tb_dict[str(r)+","+str(c_no)][0].delete(0,END)
+						self.tb_dict[str(r)+","+str(c_no)][0].insert(0,ds[r])
+						self.data[data.name][r]=ds[r]
+			except Exception as e:
+				pass
+		else:
+			self.add_column(data)
+					
 	def add_empty_column(self,column_name):
+		self.no_cols+=1
 		c=self.no_cols
 		var=StringVar()
 		x=Entry(self.scrollable_frame,fg="green",bg="black",cursor="arrow",justify="center",highlightcolor="green",font=('Arial',8,'bold'),state="readonly",textvariable=var)
@@ -145,7 +170,7 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(""))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,"")
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=r+1,column=c)
-			print(r,c)
+			#print(r,c)
 		self.data[column_name] = self.data.apply(lambda _: '', axis=1)
 	
 	def get_tbdata(self):
