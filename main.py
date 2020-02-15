@@ -28,7 +28,14 @@ class main_window(Frame):
 			#self.table.update_column(self.table.data.apply(lambda x:self.spectrum.c_T(x['W']),axis=1))
 		else:
 			messagebox.showinfo("Info", "Unable to generate wave spectrum")
-			
+	def about(self)	:
+		about_dialog=about(self.master)
+	def plot_wavespectrum(self):
+		df=self.table.data.copy()
+		plotwave=plotwindow(self.master,x=df["W"],y=df["sw"])
+	def plot_Encounterspectrum(self):
+		df=self.table.data.copy()
+		plotwave=plotwindow(self.master,x=df["we"],y=df["swe"])
 	def Generate_encounterspectrum(self):
 		df=self.table.data.copy()
 		try:
@@ -57,10 +64,10 @@ class main_window(Frame):
 		self.filemenu.add_command(label="Generate wave spectrum",command=self.Generate_wavespectrum)
 		self.filemenu.add_command(label="Generate Encounter spectrum",command=self.Generate_encounterspectrum)
 		self.plot=Menu(self.menubar,tearoff=0)
-		self.plot.add_command(label="plot Wave spectrum")
-		self.plot.add_command(label="plot Encounter spectrum")
+		self.plot.add_command(label="plot Wave spectrum",command=self.plot_wavespectrum)
+		self.plot.add_command(label="plot Encounter spectrum",command=self.plot_Encounterspectrum)
 		self.help=Menu(self.menubar,tearoff=0)
-		self.help.add_command(label="about")
+		self.help.add_command(label="about",command=self.about)
 		self.filemenu.add_separator()
 		self.menubar.add_cascade(label="Spectrum", menu=self.filemenu)
 		self.menubar.add_cascade(label="Plot", menu=self.plot)
