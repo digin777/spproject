@@ -116,13 +116,13 @@ class plotwindow(Toplevel):
 			xlabel = "Frequency (W)\n (rad/sec)",
 			ylabel = "S(w)")
 		chart=FigureCanvasTkAgg(self.fig,master)
-		chart.get_tk_widget().pack(side=TOP)
 		self.comboselectgraphtype= ttk.Combobox(master, 
                             values=[
                                     "Line", 
                                     "Scatter",
                                     "Bar"])
-		self.comboselectgraphtype.pack(side=LEFT)
+		self.comboselectgraphtype.pack(side=LEFT,fill="x")
+		chart.get_tk_widget().pack(side=TOP)
 		self.comboselectgraphtype.current(0)
 		self.comboselectgraphtype.bind("<<ComboboxSelected>>", self.graph_selected)
 

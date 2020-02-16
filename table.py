@@ -22,7 +22,7 @@ class TbEntry(Entry):
 		
 	def handle_double_click(self,event):
 		self['state']=NORMAL
-		
+		print(self.id)
 	def handle_left_click(self,event):
 		if self.flag:
 			self.old_value=self.get()
@@ -126,12 +126,13 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(data.iloc[0][data.columns[c]]))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,str(data.iloc[0][data.columns[c]]))
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=(r+1),column=c)
+		print(f"row in {r} column{c}")
 		self.no_rows+=1
 		
 	def add_column(self,data):
 		assert isinstance(data,pd.core.series.Series),"It must be pandas Series"
 		self.add_empty_column(data.name)
-		c=self.no_cols
+		c=self.no_cols-1
 		ds=[i for i in data]
 		for r in range(len(ds)):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(ds[r]))
@@ -143,7 +144,7 @@ class table(Frame):
 		c=self.no_cols
 		if data.name in self.data.columns:
 			c_no=list(self.data.columns).index(data.name)
-			c_no+=1
+			#c_no+=1
 			try:
 				if type(self.tb_dict[str(0)+","+str(c_no)]) ==tuple:
 					ds=[i for i in data]
@@ -158,8 +159,9 @@ class table(Frame):
 			self.add_column(data)
 					
 	def add_empty_column(self,column_name):
-		self.no_cols+=1
 		c=self.no_cols
+		self.no_cols+=1
+		#c=self.no_cols
 		var=StringVar()
 		x=Entry(self.scrollable_frame,fg="green",bg="black",cursor="arrow",justify="center",highlightcolor="green",font=('Arial',8,'bold'),state="readonly",textvariable=var)
 		var.set(column_name)
@@ -170,7 +172,7 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(""))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,"")
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=r+1,column=c)
-			#print(r,c)
+			print(r+1,c)
 		self.data[column_name] = self.data.apply(lambda _: '', axis=1)
 	
 	def get_tbdata(self):
