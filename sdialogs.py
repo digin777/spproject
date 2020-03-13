@@ -96,7 +96,7 @@ class plotwindow(Toplevel):
 			xlabel = "Encounter Frequency (We)\n (rad/sec)",
 			ylabel = "S(we)")
 			self.fig.canvas.draw()
-		elif self.x.name=="W":
+		elif self.x.name=="w":
 			self.ax.set(title = "Wave Spectrum",
 			xlabel = "Frequency (W)\n (rad/sec)",
 			ylabel = "S(w)")

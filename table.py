@@ -126,7 +126,6 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(data.iloc[0][data.columns[c]]))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,str(data.iloc[0][data.columns[c]]))
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=(r+1),column=c)
-		print(f"row in {r} column{c}")
 		self.no_rows+=1
 		
 	def add_column(self,data):
@@ -172,7 +171,6 @@ class table(Frame):
 			self.tb_dict[str(r)+","+str(c)][1].set(str(""))
 			self.tb_dict[str(r)+","+str(c)][0].insert(0,"")
 			self.tb_dict[str(r)+","+str(c)][0].grid(row=r+1,column=c)
-			print(r+1,c)
 		self.data[column_name] = self.data.apply(lambda _: '', axis=1)
 	
 	def get_tbdata(self):
@@ -183,10 +181,13 @@ class table(Frame):
 		
 if __name__=='__main__':
 	#s=pd.read_csv("D:\\S6 MCA\\Main_project_siva_and_prasanth\\data\\pddataf.csv")
-	x="D:\\S6 MCA\\Main_project_siva_and_prasanth\\data\\pddata.csv"
+	x="D:\\S6 MCA\\Main_project_siva_and_prasanth\\data\\fg.csv"
 	#x="C:\\Users\\user\\Downloads\\hepatitis.csv"
 	s=pd.read_csv(x)
 	root=Tk()
+	photo = PhotoImage(file = "D:\\S6 MCA\\Main_project_siva_and_prasanth\\resorces\\trend.png")
+	root.iconphoto(False, photo)
+	#root.tk.call('wm', 'iconphoto', root._w, PhotoImage(file='D:\S6 MCA\Main_project_siva_and_prasanth\resorces\trend.png'))
 	a=table(master=root,data=s)
 	a.add_row({'T':10,'w':11,'s':15,'a.g2.w-5':12,'-(w-w0)2':13,'2.s2w02':20,'f(g)':55,'f(w/w0)':36,'Sz(w)':45,'SM':23,'f[Sz(w)]':71})
 	a.mainloop()
