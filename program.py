@@ -19,7 +19,7 @@ df=pd.DataFrame(columns=['T','w','sig','sw'])
 no_w=int(input("no of w : "))
 for i in range(no_w):
 	#w=float(input("input w : "))
-	for w in np.arange(0.250,1.0,0.050):
+	for w in np.arange(0.250,2.225,0.025):
 		df=df.append({'T':spetrum.c_T(w),'w':w,'sig':spetrum.c_sigma(w),'sw':spetrum.c_somega(w,spetrum.c_sigma(w))},ignore_index=True)
 print(df.head())
 inp=input('do you want compute spectum')
@@ -32,3 +32,4 @@ if inp=="y":
 	print(df)
 	plt.plot(df['we'],df['swe'])
 	plt.show()
+	df.to_csv('out.csv',index=False)

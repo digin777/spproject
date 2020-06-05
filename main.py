@@ -116,7 +116,6 @@ class main_window(Frame):
 		self.menubar.add_cascade(label="Help", menu=self.help)
 		self.master.config(menu=self.menubar)
 		
-
 if __name__=='__main__':
 	root=Tk()
 	root.geometry("700x500")
