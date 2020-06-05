@@ -6,7 +6,7 @@ from lib.spectrum import johnswapspectrum
 from tkinter.filedialog import asksaveasfile,askopenfile
 from sdialogs import *
 import pandas as pd
-from Interpolation import *
+from interpolaton import *
 class main_window(Frame):
 	def __init__(self,master=None):
 		super().__init__(master)
