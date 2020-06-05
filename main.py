@@ -6,6 +6,7 @@ from lib.spectrum import johnswapspectrum
 from tkinter.filedialog import asksaveasfile,askopenfile
 from sdialogs import *
 import pandas as pd
+from Interpolation import *
 class main_window(Frame):
 	def __init__(self,master=None):
 		super().__init__(master)
@@ -44,7 +45,14 @@ class main_window(Frame):
 			plotwave=plotwindow(self.master,x=df["we"],y=df["swe"])
 		else:
 			messagebox.showerror("Error","Generate Encounter Spectra first")	
-		
+	def Generate_responsespectrum(self):
+		df=self.table.data.copy()
+		x,y=interpolation(df['we'],df['swe'],len(df['we'])-2)
+		df['inter we']=pd.Series(x)
+		df['inter swe']=pd.Series(y)
+		self.table.update_column(df['inter we'])
+		self.table.update_column(df['inter swe'])
+	
 	def Generate_encounterspectrum(self):
 		df=self.table.data.copy()
 		try:
@@ -76,6 +84,7 @@ class main_window(Frame):
 		if file_name is None: 
 			return
 		self.table.data.to_csv(file_name,index=False,sep=",",line_terminator='\n',encoding='utf-8')
+		
 	def Open(self):
 		filetypes =[('Coma separated values', 'csv')]
 		file_name=askopenfile(mode='r', defaultextension=".csv")
@@ -83,6 +92,7 @@ class main_window(Frame):
 			return
 		self.table.destroy()
 		self.table=table(self,pd.read_csv(file_name))
+		
 	def add_widgets(self):
 		self.table=table(self,data=pd.DataFrame({'w':[""]}))
 		self.menubar=Menu(self.master)
@@ -93,6 +103,7 @@ class main_window(Frame):
 		self.spectmenu = Menu(self.menubar, tearoff=0)
 		self.spectmenu.add_command(label="Generate wave spectrum",command=self.Generate_wavespectrum)
 		self.spectmenu.add_command(label="Generate Encounter spectrum",command=self.Generate_encounterspectrum)
+		self.spectmenu.add_command(label="Generate Response spectrum",command=self.Generate_responsespectrum)
 		self.plot=Menu(self.menubar,tearoff=0)
 		self.plot.add_command(label="plot Wave spectrum",command=self.plot_wavespectrum)
 		self.plot.add_command(label="plot Encounter spectrum",command=self.plot_Encounterspectrum)
@@ -110,7 +121,7 @@ if __name__=='__main__':
 	root=Tk()
 	root.geometry("700x500")
 	root.title("Spectral analyzer")
-	photo = PhotoImage(file = "D:\\S6 MCA\\Main_project_siva_and_prasanth\\resorces\\ship_x.png")
+	photo = PhotoImage(file = "D:\\S6 MCA\\Main_project_siva_and_prasanth\\resorces\\icons\\ship_x.png")
 	root.iconphoto(True, photo)
 	app=main_window(master=root)
 	app.mainloop() 
