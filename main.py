@@ -3,16 +3,20 @@ from tkinter import *
 from tkinter import simpledialog
 from table import *
 from lib.spectrum import johnswapspectrum
+from lib.generate import *
 from tkinter.filedialog import asksaveasfile,askopenfile
 from sdialogs import *
+from RAOparser import *
 import pandas as pd
 from interpolaton import *
+import matplotlib.pyplot as plt
 class main_window(Frame):
 	def __init__(self,master=None):
 		super().__init__(master)
 		self.master=master
 		self.pack(fill="both",expand=True)
 		self.add_widgets()
+		self.spectrum=johnswapspectrum()
 		
 	def Generate_wavespectrum(self):
 		dialog=wavedialog(self.master)
@@ -45,14 +49,65 @@ class main_window(Frame):
 			plotwave=plotwindow(self.master,x=df["we"],y=df["swe"])
 		else:
 			messagebox.showerror("Error","Generate Encounter Spectra first")	
+			
 	def Generate_responsespectrum(self):
 		df=self.table.data.copy()
-		x,y=interpolation(df['we'],df['swe'],len(df['we'])-2)
-		df['inter we']=pd.Series(x)
-		df['inter swe']=pd.Series(y)
-		self.table.update_column(df['inter we'])
-		self.table.update_column(df['inter swe'])
-	
+		dialog=resdialog(self.master)
+		if dialog.resdict:
+			self.PRAO=dialog.resdict['PRAO']
+			self.Mtype=dialog.resdict['Mtype']
+			self.Msubtype=dialog.resdict['Msubtype']
+		else:
+			messagebox.showinfo("Info","Operation Aborted")
+			return
+		self.raoresult,maxfreq,minfreq=RAOparse(self.PRAO)
+		interx,intery=interpolation(df['we'],df['swe'],len(df['we'])-2)
+		newx=[]
+		newy=[]
+		for x in interx:#filter out we from interpolated result to match with the Rao result
+			if x>=minfreq and x<=maxfreq:
+				newx.append(x)
+				newy.append(intery[interx.index(x)])
+		motype=self.Mtype+self.Msubtype
+		data=self.RAO_Common_ForEach_Motion(motype,newx,newy)
+		print(data)
+		h=data["new we"][1]-data["new we"][0]
+		print("M0 : ",str(h/3*data["F(A)"].sum()))
+		print("M1 : ",str((h**2/3)*data["F(M1)"].sum()))
+		print("M2 : ",str((h**3/3)*data["F(M2)"].sum()))
+		print("M4 : ",str((h**5/3)*data["F(M4)"].sum()))
+
+		
+	def RAO_Common_ForEach_Motion(self,motype,newx,newy):
+		try:
+			if self.angle==None:
+				self.angle=0
+		except AttributeError:
+			self.angle=0
+		df=pd.DataFrame()
+		raoy=list(self.raoresult[(self.raoresult.heading==self.angle)][motype])
+		raox =list(self.raoresult[(self.raoresult.heading==self.angle)]['frequency'])
+		df["RAO"]=np.interp(newx,raox,raoy)
+		df["new we"]=newx
+		df["swe"]=newy
+		df["Sr(we)"]=df['swe']*(df["RAO"]**2)
+		#self.table.destroy()
+		#self.table=table(self,df)
+		df["SM"]=pd.Series(generate(df.shape[0])).values
+		df["F(A)"]=df["Sr(we)"]*df["SM"]
+		df["L"]=pd.Series(range(0,df.shape[0]))
+		if df["new we"][0]!=0:
+			df["F(M1)"]=df["F(A)"]*df["L"]
+			df["F(M2)"]=df["F(A)"]*(df["L"]**2)
+			df["F(M4)"]=df["F(A)"]*(df["L"]**4)
+		for column in df.columns:
+			self.table.update_column(df[column])
+		print(self.table.data)
+		#plt.plot(df["new we"],df["Sr(we)"])
+		#plt.show()
+		return df
+
+		
 	def Generate_encounterspectrum(self):
 		df=self.table.data.copy()
 		try:
@@ -63,6 +118,7 @@ class main_window(Frame):
 		dialog=enwavedialog(self.master)
 		if dialog.enwavedict:
 			angle=dialog.enwavedict["angle"]
+			self.angle=angle
 			if angle>360:
 				messagebox.showerror("Error","angle of encounter canot be garter than 360")
 				return

@@ -33,10 +33,11 @@ def RAOparse(file):
 	for head in hdline:
 		for freq in fline:
 			dfleft=dfleft.append(pd.DataFrame.from_dict({"heading":[head],"frequency":[freq]},dtype=float),ignore_index=True)
-	dfright=x=pd.read_csv("data.tsv",sep="\t",names=["SurgeModul","SurgePhase","SwayModul","SwayPhase","HeaveModul","HeavePhase","RollModul","RollPhase","PitchModul","PitchPhase","YawModul","YawPhase",""])
+	dfright=x=pd.read_csv("data.tsv",sep="\t",names=["SurgeModulo","SurgePhase","SwayModulo","SwayPhase","HeaveModulo","HeavePhase","RollModulo","RollPhase","PitchModulo","PitchPhase","YawModulo","YawPhase",""])
 	dfright.dropna(axis=1,how="all",inplace=True)
 	result=pd.concat([dfleft,dfright],axis=1,sort=False)
-	result.to_csv("out.csv",index=False)
+	return result,max(fline),min(fline)
+	#result.to_csv("out.csv",index=False)
 
 	
 		

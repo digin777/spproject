@@ -2,7 +2,9 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import simpledialog
 import matplotlib.pyplot as plt
+from tkinter.filedialog import asksaveasfile,askopenfile
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os
 class enwavedialog(simpledialog.Dialog):
 	def body(self, master):
 		self.enwavedict=None
@@ -24,7 +26,53 @@ class enwavedialog(simpledialog.Dialog):
 			
 	def apply(self):
 		pass
-				
+		
+class resdialog(simpledialog.Dialog):
+	def body(self,master):
+		self.resdict=None
+		Label(master, text="Location OF RAO File :").grid(row=0)
+		Label(master, text="Type of Motion :").grid(row=1)
+		Label(master, text="Select Type :").grid(row=2)
+		self.butbrowse=Button(master,text="browse",command=self.cmd_browse)
+		self.e1 = Entry(master,width=25)
+		self.comb1 = ttk.Combobox(master,width=22,values=('Surge','Roll','Sway','Pitch','Heave','Yaw'))
+		self.comb2 = ttk.Combobox(master,width=22,values=('Modulo','Phase'))
+		#self.comb1.current(0)
+		self.e1.grid(row=0, column=1)
+		self.comb1.grid(row=1, column=1)
+		self.comb2.grid(row=2, column=1)
+		self.butbrowse.grid(row=0,column=2)
+		return self.e1 # initial focus
+		
+	def cmd_browse(self):
+		filetypes =[('data File', '*.dat'),('All Files','*.*')]
+		file_name=askopenfile(mode='r', defaultextension="*.dat",filetypes=filetypes)
+		if file_name is None: 
+			return
+		else:
+			self.dataLoc=file_name.name
+			self.e1.delete(0,'end')
+			self.e1.insert(0,self.dataLoc)
+			
+	def validate(self):
+		Message=""
+		if self.comb1.get()=="" or self.comb2.get()=="":
+			Message+="Select Motion Type and its subtype\n"
+		try:
+			if os.path.isfile(self.dataLoc):
+				self.dataLoc.replace('/','//')
+			else:
+				raise Exception
+		except:
+			Message+="The RAO File Not Existed"
+		if Message!="":
+			messagebox.showerror("Error", Message)
+		else:
+			self.resdict={'PRAO':self.dataLoc,'Mtype':self.comb1.get(),'Msubtype':self.comb2.get()}
+			return 1
+		
+		
+	
 class wavedialog(simpledialog.Dialog):
 	def body(self, master):
 		self.wavedict=None
@@ -47,6 +95,7 @@ class wavedialog(simpledialog.Dialog):
 		self.e5.grid(row=4, column=1)
 		self.e6.grid(row=5, column=1)
 		return self.e1 # initial focus
+		
 	
 	def validate(self):
 		try:
@@ -111,7 +160,7 @@ class plotwindow(Toplevel):
 			self.ax.set(title = "Encounter Spectrum",
 			xlabel = "Encounter Frequency (We)\n (rad/sec)",
 			ylabel = "S(we)")
-		elif self.x.name=="W":
+		elif self.x.name=="w":
 			self.ax.set(title = "Wave Spectrum",
 			xlabel = "Frequency (W)\n (rad/sec)",
 			ylabel = "S(w)")
