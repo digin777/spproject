@@ -46,10 +46,19 @@ class main_window(Frame):
 	def plot_Encounterspectrum(self):
 		df=self.table.data.copy()
 		if "swe" in list(df.columns):
-			plotwave=plotwindow(self.master,x=df["we"],y=df["swe"])
+			plotEncounter=plotwindow(self.master,x=df["we"],y=df["swe"])
 		else:
 			messagebox.showerror("Error","Generate Encounter Spectra first")	
 			
+	def plot_Responsespectrum(self):
+		df=self.table.data.copy()
+		if "Sr(we)" in list(df.columns):
+			dfx=df[pd.to_numeric(df["new we"],errors="coerce").notnull()]
+			dfy=df[pd.to_numeric(df["Sr(we)"],errors="coerce").notnull()]
+			plotResponse=plotwindow(self.master,x=dfx["new we"].dropna(),y=dfy["Sr(we)"].dropna())
+		else:
+			messagebox.showerror("Error","Response spectrum Not Generated")
+
 	def Generate_responsespectrum(self):
 		df=self.table.data.copy()
 		dialog=resdialog(self.master)
@@ -70,12 +79,14 @@ class main_window(Frame):
 				newy.append(intery[interx.index(x)])
 		motype=self.Mtype+self.Msubtype
 		data=self.RAO_Common_ForEach_Motion(motype,newx,newy)
-		print(data)
+		self.res_data=data
 		h=data["new we"][1]-data["new we"][0]
-		print("M0 : ",str(h/3*data["F(A)"].sum()))
-		print("M1 : ",str((h**2/3)*data["F(M1)"].sum()))
-		print("M2 : ",str((h**3/3)*data["F(M2)"].sum()))
-		print("M4 : ",str((h**5/3)*data["F(M4)"].sum()))
+		self.result={
+		"M0":str(h/3*self.res_data["F(A)"].sum()),
+		"M1":str((h**2/3)*self.res_data["F(M1)"].sum()),
+		"M2":str((h**3/3)*self.res_data["F(M2)"].sum()),
+		"M4":str((h**5/3)*self.res_data["F(M4)"].sum())
+		}
 
 		
 	def RAO_Common_ForEach_Motion(self,motype,newx,newy):
@@ -102,7 +113,6 @@ class main_window(Frame):
 			df["F(M4)"]=df["F(A)"]*(df["L"]**4)
 		for column in df.columns:
 			self.table.update_column(df[column])
-		print(self.table.data)
 		#plt.plot(df["new we"],df["Sr(we)"])
 		#plt.show()
 		return df
@@ -135,19 +145,25 @@ class main_window(Frame):
 		sys.exit()
 		
 	def Exports_csv(self):
-		filetypes =[('Coma separated values', 'csv')]
-		file_name=asksaveasfile(mode='w', defaultextension=".csv")
+		filetypes =[('Coma separated values', '*.csv'),('All Files','*.*')]
+		file_name=asksaveasfile(mode='w', defaultextension=".csv",filetypes=filetypes)
 		if file_name is None: 
 			return
 		self.table.data.to_csv(file_name,index=False,sep=",",line_terminator='\n',encoding='utf-8')
 		
 	def Open(self):
-		filetypes =[('Coma separated values', 'csv')]
-		file_name=askopenfile(mode='r', defaultextension=".csv")
+		filetypes =[('Coma separated values', '*.csv')]
+		file_name=askopenfile(mode='r', defaultextension=".csv",filetypes =filetypes)
 		if file_name is None: 
 			return
 		self.table.destroy()
 		self.table=table(self,pd.read_csv(file_name))
+		
+	def view_result(self):
+		try:
+			result_view =view_reult(self.master,data=self.result)
+		except AttributeError:
+			return messagebox.showinfo("info","plese perform generate response spectrun")
 		
 	def add_widgets(self):
 		self.table=table(self,data=pd.DataFrame({'w':[""]}))
@@ -163,11 +179,15 @@ class main_window(Frame):
 		self.plot=Menu(self.menubar,tearoff=0)
 		self.plot.add_command(label="plot Wave spectrum",command=self.plot_wavespectrum)
 		self.plot.add_command(label="plot Encounter spectrum",command=self.plot_Encounterspectrum)
+		self.plot.add_command(label="plot Response spectrum",command=self.plot_Responsespectrum)
+		self.view=Menu(self.menubar,tearoff=0)
+		self.view.add_command(label="View Result",command=self.view_result)
 		self.help=Menu(self.menubar,tearoff=0)
 		self.help.add_command(label="about",command=self.about)
 		self.spectmenu.add_separator()
 		self.menubar.add_cascade(label="File", menu=self.filemenu)
 		self.menubar.add_cascade(label="Spectrum", menu=self.spectmenu)
+		self.menubar.add_cascade(label="View", menu=self.view)
 		self.menubar.add_cascade(label="Plot", menu=self.plot)
 		self.menubar.add_cascade(label="Help", menu=self.help)
 		self.master.config(menu=self.menubar)

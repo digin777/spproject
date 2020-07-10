@@ -112,6 +112,38 @@ class wavedialog(simpledialog.Dialog):
 		
 	def apply(self):
 		pass
+
+class view_reult(Toplevel):
+	def __init__(self,master,data=None):
+		Toplevel.__init__(self,master)
+		self.data=data
+		self.transient(master)
+		self.parent = master
+		body = Frame(self,width=100,height=100)
+		self.initial_focus = self.body(body)
+		body.pack(padx=5, pady=5,fill=BOTH,expand=True)
+		
+	def body(self,master):
+		Label(master,text="Moment (M0)",width=20).grid(row=0,column=0)
+		Label(master,text="Moment (M1)",width=20).grid(row=1,column=0)
+		Label(master,text="Moment (M2)",width=20).grid(row=2,column=0)
+		Label(master,text="Moment (M3)",width=20).grid(row=3,column=0)
+		strv0=StringVar()
+		strv0.set(str(self.data["M0"]))
+		strv1=StringVar()
+		strv1.set(str(self.data["M1"]))
+		strv2=StringVar()
+		strv2.set(str(self.data["M2"]))
+		strv4=StringVar()
+		strv4.set(str(self.data["M4"]))
+		self.enM0=Entry(master,width=60,textvariable=strv0,state="readonly")
+		self.enM1=Entry(master,width=60,textvariable=strv1,state="readonly")
+		self.enM2=Entry(master,width=60,textvariable=strv2,state="readonly")
+		self.enM4=Entry(master,width=60,textvariable=strv4,state="readonly")
+		self.enM0.grid(row=0,column=1)
+		self.enM1.grid(row=1,column=1)
+		self.enM2.grid(row=2,column=1)
+		self.enM4.grid(row=3,column=1)
 		
 class plotwindow(Toplevel):
 	def __init__(self, master, title = None,x=None,y=None):
@@ -140,30 +172,39 @@ class plotwindow(Toplevel):
 			self.ax.clear()
 			self.ax.bar(self.x, self.y)
 			
-		if self.x.name=="we":
+		if self.y.name=="swe":
 			self.ax.set(title = "Encounter Spectrum",
 			xlabel = "Encounter Frequency (We)\n (rad/sec)",
 			ylabel = "S(we)")
 			self.fig.canvas.draw()
-		elif self.x.name=="w":
+		elif self.y.name=="sw":
 			self.ax.set(title = "Wave Spectrum",
 			xlabel = "Frequency (W)\n (rad/sec)",
 			ylabel = "S(w)")
 			self.fig.canvas.draw()
-			
+		elif self.y.name=="Sr(we)":
+			self.ax.set(title = "Response Spectrum",
+			xlabel = "Frequency (We)\n (rad/sec)",
+			ylabel = "Sr(we)")
+			self.fig.canvas.draw()
 	def body(self, master):
 		plt.ion()
 		self.fig=plt.Figure(figsize=(10,6),dpi=100)
-		self.ax=self.fig.add_subplot(111)
+		self.ax=self.fig.add_subplot(111)		
 		self.ax.plot(self.x,self.y)
-		if self.x.name=="we":
+		if self.y.name=="swe":
 			self.ax.set(title = "Encounter Spectrum",
 			xlabel = "Encounter Frequency (We)\n (rad/sec)",
 			ylabel = "S(we)")
-		elif self.x.name=="w":
+		elif self.y.name=="sw":
 			self.ax.set(title = "Wave Spectrum",
 			xlabel = "Frequency (W)\n (rad/sec)",
 			ylabel = "S(w)")
+		elif self.y.name=="Sr(we)":
+			self.ax.set(title = "Response Spectrum",
+			xlabel = "Frequency (We)\n (rad/sec)",
+			ylabel = "Sr(we)")
+			self.fig.canvas.draw()
 		chart=FigureCanvasTkAgg(self.fig,master)
 		self.comboselectgraphtype= ttk.Combobox(master, 
                             values=[
