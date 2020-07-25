@@ -7,6 +7,7 @@ from lib.generate import *
 from tkinter.filedialog import asksaveasfile,askopenfile
 from sdialogs import *
 from RAOparser import *
+from pathlib import Path
 import pandas as pd
 from interpolaton import *
 import matplotlib.pyplot as plt
@@ -113,8 +114,6 @@ class main_window(Frame):
 			df["F(M4)"]=df["F(A)"]*(df["L"]**4)
 		for column in df.columns:
 			self.table.update_column(df[column])
-		#plt.plot(df["new we"],df["Sr(we)"])
-		#plt.show()
 		return df
 
 		
@@ -195,8 +194,14 @@ class main_window(Frame):
 if __name__=='__main__':
 	root=Tk()
 	root.geometry("700x500")
-	root.title("Spectral analyzer")
-	photo = PhotoImage(file = "D:\\S6 MCA\\Main_project_siva_and_prasanth\\resorces\\icons\\ship_x.png")
-	root.iconphoto(True, photo)
+	root.title("Spectral Analyzer")
+	path=Path(os.getcwd())
+	path=str(path.parent)+"\\resorces\\icons\\ship_x.png"
+	try:
+		photo = PhotoImage(file = path)
+		root.iconphoto(True, photo)
+	except Exception as e:
+		pass
+
 	app=main_window(master=root)
 	app.mainloop() 

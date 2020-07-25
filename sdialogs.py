@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import simpledialog
 import matplotlib.pyplot as plt
+from pathlib import Path
+from PIL import Image,ImageTk
 from tkinter.filedialog import asksaveasfile,askopenfile
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
@@ -218,10 +220,18 @@ class plotwindow(Toplevel):
 
 class about(simpledialog.Dialog):
 	def body(self, master):
-		Label(master, text="Spectral Analyzer",justify="center",font=("Times New Roman", 12, "bold")).pack()
-		Label(master, text="version : 1.0",justify="center").pack()
-		Label(master, text="Developer : DSP software foundation",justify="center").pack()
-	
+		path=Path(os.getcwd())
+		path=str(path.parent)+"\\resorces\\icons\\ship_x.png"
+		image=ImageTk.PhotoImage((Image.open(path)).resize((50,50),Image.ANTIALIAS))
+		imagelabel=Label(master,image=image,justify="center",width=50,height=50)
+		imagelabel.image=image
+		imagelabel.pack(side=LEFT)
+		Label(master, text="Spectral Analyzer",justify="center",font=("Arial", 12, "bold")).pack()
+		fbody=Frame(master,bd=1,relief=SUNKEN)
+		Label(fbody, text="Version : 1.0",justify="left").pack()
+		Label(fbody, text="Developer : DSP Software Foundation",justify="left").pack()
+		Label(fbody, text="Fork me on github",justify="left",fg="blue",cursor="hand2").pack()
+		fbody.pack()
 	def buttonbox(self):
 		box = Frame(self)
 		w = Button(box, text="OK", width=10, command=self.ok, default=ACTIVE)

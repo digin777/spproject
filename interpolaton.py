@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 def interpolation(x,y,novalues):
 	xmin=x.min()
 	xmax=x.max()
-	print(xmax,xmin)
 	ratio=(xmax-xmin)/(novalues+1)
 	xval=xmin
 	xvalues=[]
@@ -13,7 +12,9 @@ def interpolation(x,y,novalues):
 		xvalues.append(xval)
 	xvalues.insert(0,xmin)
 	xvalues.append(xmax)
-	yvalues=np.interp(xvalues,x,y)
+	x=x.to_numpy(dtype="float")
+	y=y.to_numpy(dtype="float")
+	yvalues=np.interp(x=xvalues,xp=x,fp=y)
 	return(xvalues,yvalues)
 	
 
